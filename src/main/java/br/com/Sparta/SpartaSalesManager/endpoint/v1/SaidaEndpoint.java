@@ -22,38 +22,40 @@ public class SaidaEndpoint {
         this.dao = entradaRepository;
     }
 
-    @ApiOperation(value = "Retorna todas as Entradas", response = Saida.class)
     @GetMapping
+    @ApiOperation(value = "Listar todas as Saídas", notes = "Listar todas as Saídas, sem exceções", response = Saida.class)
     public ResponseEntity<?> listAll(Pageable pageable) {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Retorna Saída baseado no id informado", response = Saida.class, notes = "Usuário somente pode pesquisar Saidas próprias")
     @GetMapping(path = "{id}")
+    @ApiOperation(value = "Pequisar Saída pelo ID", notes = "Pesquisar Saída pelo ID indicado na URL", response = Saida.class)
     public ResponseEntity<?> getSaidaById(@PathVariable long id) {
         return new ResponseEntity<>(dao.findById(id), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Retorna Saídas baseado no Usuário logado", response = Saida.class)
     @GetMapping(path = "/serchByUsuarioLogado")
+    @ApiOperation(value = "Pequisar Saídas pelo usuário logado", notes = "Pesquisar Saídas pelo usuário logado", response = Saida.class)
     public ResponseEntity<?> getSaidaByUser(Authentication authentication) {
         ApplicationUser applicationUser = ((ApplicationUser) authentication.getPrincipal());
         return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Retorna Saídas baseado no Usuário informado", response = Saida.class)
     @GetMapping(path = "/serchByUsuarioInformado")
+    @ApiOperation(value = "Pequisar Saídas pelo usuário informado", notes = "Pesquisar Saídas pelo usuário informado", response = Saida.class)
     public ResponseEntity<?> getSaidaByInformeUser(ApplicationUser applicationUser) {
         return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
     }
 
     @PostMapping
+    @ApiOperation(value = "Salvar nova Saída", notes = "Salvar nova Saída enviado no Body", response = Saida.class)
     public ResponseEntity<?> save(@RequestBody Saida saida, Authentication authentication) {
         saida.setApplicationUser((ApplicationUser)authentication.getPrincipal());
         return new ResponseEntity<>(dao.save(saida), HttpStatus.CREATED);
     }
 
     @PutMapping
+    @ApiOperation(value = "Atualizar Saída", notes = "Atualizar Saída enviada no Body, desde que preenchido o ID para identificação", response = Saida.class)
     public ResponseEntity<?> update(@RequestBody Saida saida, Authentication authentication) {
         verifyIfSaidaExists(saida.getId());
         saida.setApplicationUser((ApplicationUser)authentication.getPrincipal());
@@ -62,6 +64,7 @@ public class SaidaEndpoint {
     }
 
     @DeleteMapping(path = "{id}")
+    @ApiOperation(value = "Deletar Saída", notes = "Deletar Saída a partir do ID indicado na URL")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         verifyIfSaidaExists(id);
         dao.deleteById(id);

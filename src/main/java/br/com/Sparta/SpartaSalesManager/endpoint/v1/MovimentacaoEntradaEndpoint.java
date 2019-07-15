@@ -4,6 +4,7 @@ import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.Entrada;
 import br.com.Sparta.SpartaSalesManager.persistence.model.MovimentacaoEntrada;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.MovimentacaoEntradaRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,13 @@ public class MovimentacaoEntradaEndpoint {
     }
 
     @GetMapping
+    @ApiOperation(value = "Listar todas as Movimentações de Entrada", notes = "Listar todas as Movimentações de Entrada, sem exceções", response = MovimentacaoEntrada.class)
     public ResponseEntity<?> listAll(Pageable pageable) {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("findByEntrada/{idEntrada}")
+    @ApiOperation(value = "Pesquisar Movimentações de Entrada pela Entrada", notes = "Pesquisar Movimentações de Entrada pelo ID de Entrada inficado na URL", response = MovimentacaoEntrada.class)
     public ResponseEntity<?> findByEntrada (@PathVariable Long idEntrada) {
         Entrada e = new Entrada();
         e.setId(idEntrada);
@@ -35,26 +38,30 @@ public class MovimentacaoEntradaEndpoint {
     }
 
     @PostMapping
+    @ApiOperation(value = "Salvar nova Movimentação de Entrada", notes = "Salvar nova Movimentação Entrada enviada no Body", response = MovimentacaoEntrada.class)
     public ResponseEntity<?> save(@RequestBody MovimentacaoEntrada movimentacaoEntrada) {
         return new ResponseEntity<>(dao.save(movimentacaoEntrada), HttpStatus.CREATED);
     }
 
     @PostMapping("saveAll")
+    @ApiOperation(value = "Salvar novas Movimentações de Entrada", notes = "Salvar novas Movimentações Entrada enviadas no Body", response = MovimentacaoEntrada.class)
     public ResponseEntity<?> saveAll(@RequestBody List<MovimentacaoEntrada> movimentacaoEntradaList) {
         return new ResponseEntity<>(dao.saveAll(movimentacaoEntradaList), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        verifyIfMovimentacaoEntradaExists(id);
-        dao.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @PutMapping
+    @ApiOperation(value = "Atualizar Movimentação de Entrada", notes = "Atualizar Movimentação Entrada enviada no Body, desde que preenchido o ID para identificação", response = MovimentacaoEntrada.class)
     public ResponseEntity<?> update(@RequestBody MovimentacaoEntrada movimentacaoEntrada) {
         verifyIfMovimentacaoEntradaExists(movimentacaoEntrada.getId());
         dao.save(movimentacaoEntrada);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "{id}")
+    @ApiOperation(value = "Deletar Movimentação de Entrada", notes = "Deletar Movimentação Entrada a partir do ID indicado na URL")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        verifyIfMovimentacaoEntradaExists(id);
+        dao.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

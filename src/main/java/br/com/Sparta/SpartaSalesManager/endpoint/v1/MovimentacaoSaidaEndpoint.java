@@ -3,6 +3,7 @@ package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.MovimentacaoSaida;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.MovimentacaoSaidaRepository;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,16 +23,19 @@ public class MovimentacaoSaidaEndpoint {
     }
 
     @GetMapping
+    @ApiOperation(value = "Listar todas as Movimentações de Saída", notes = "Listar todas as Movimentações de Saída, sem exceções", response = MovimentacaoSaida.class)
     public ResponseEntity<?> listAll(Pageable pageable) {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
     @PostMapping
+    @ApiOperation(value = "Gravar nova Movimentação de Saída", notes = "Gravar nova Movimentação de Saída enviada no Body", response = MovimentacaoSaida.class)
     public ResponseEntity<?> save(@Valid @RequestBody MovimentacaoSaida movimentacaoSaida) {
         return new ResponseEntity<>(dao.save(movimentacaoSaida), HttpStatus.CREATED);
     }
 
     @PutMapping
+    @ApiOperation(value = "Atualizar Movimentação de Saída", notes = "Atualizar Movimentação Saída enviada no Body, desde que preenchido o ID para identificação", response = MovimentacaoSaida.class)
     public ResponseEntity<?> update(@RequestBody MovimentacaoSaida movimentacaoSaida) {
         verifyIfMovimentacaoSaidaExists(movimentacaoSaida.getId());
         dao.save(movimentacaoSaida);
@@ -39,6 +43,7 @@ public class MovimentacaoSaidaEndpoint {
     }
 
     @DeleteMapping(path = "{id}")
+    @ApiOperation(value = "Deletar Movimentação de Saída", notes = "Deletar Movimentação Saída a partir do ID indicado na URL")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         verifyIfMovimentacaoSaidaExists(id);
         dao.deleteById(id);

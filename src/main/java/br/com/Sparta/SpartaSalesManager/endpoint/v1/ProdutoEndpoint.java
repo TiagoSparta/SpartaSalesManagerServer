@@ -21,22 +21,25 @@ public class ProdutoEndpoint {
     }
 
     @GetMapping
+    @ApiOperation(value = "Listar todos os Produtos", notes = "Listar todos os Produtos, sem exceções", response = Produto.class)
     public ResponseEntity<?> listAll(Pageable pageable) {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("findByNome/{nome}")
-    @ApiOperation(value = "Pesquisar produto pelo nome", notes = "Pesquisa produto pelo nome, campo que não pode ter valor repetido", response = Produto.class)
+    @ApiOperation(value = "Pesquisar Produto pelo nome", notes = "Pesquisar Produto pelo nome indicado na URL", response = Produto.class)
     public ResponseEntity<?> getProdutoByNome (@PathVariable String nome){
         return new ResponseEntity<>(dao.findByNome(nome), HttpStatus.OK);
     }
 
     @PostMapping
+    @ApiOperation(value = "Salvar novo Produto", notes = "Salvar novo Produto enviado no Body", response = Produto.class)
     public ResponseEntity<?> save(@RequestBody Produto produto) {
         return new ResponseEntity<>(dao.save(produto), HttpStatus.CREATED);
     }
 
     @PutMapping
+    @ApiOperation(value = "Atualizar Produto", notes = "Atualizar Produto enviado no Body, desde que preenchido o ID para identificação", response = Produto.class)
     public ResponseEntity<?> update(@RequestBody Produto produto) {
         verifyIfProdutoExists(produto.getId());
         dao.save(produto);
@@ -44,6 +47,7 @@ public class ProdutoEndpoint {
     }
 
     @DeleteMapping(path = "{id}")
+    @ApiOperation(value = "Deletar Produto", notes = "Deletar Produto a partir do ID indicado na URL")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         verifyIfProdutoExists(id);
         dao.deleteById(id);

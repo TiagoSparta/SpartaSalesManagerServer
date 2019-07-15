@@ -24,32 +24,36 @@ public class AdministradorEndpoint {
     }
 
     @GetMapping
+    @ApiOperation(value = "Listar todos os Administradores", notes = "Lista todos os administradores, sem exceções", response = Administrador.class)
     public ResponseEntity<?> listAll(Pageable pageable) {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("findByCPF/{CPF}")
-    @ApiOperation(value = "Pesquisar administrador pelo CPF", notes = "Exemplo de notas", response = Administrador.class)
-    public ResponseEntity<?> getAdministradorByCPF (@PathVariable String CPF){
+    @ApiOperation(value = "Pesquisar administrador pelo CPF", notes = "Pesquisa Administrador específico digitando o CPF na URL", response = Administrador.class)
+    public ResponseEntity<?> getAdministradorByCPF(@PathVariable String CPF) {
         return new ResponseEntity<>(dao.findByCpf(CPF), HttpStatus.OK);
     }
 
     @PostMapping
+    @ApiOperation(value = "Gravar novo Administrador", notes = "Gravar novo Administrador", response = Administrador.class)
     public ResponseEntity<?> save(@Valid @RequestBody Administrador administrador) {
         return new ResponseEntity<>(dao.save(administrador), HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        verifyIfAdministradorExists(id);
-        dao.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @PutMapping
+    @ApiOperation(value = "Atualizar Administrador", notes = "Atualizar Administrador enviado no Body, desde que preenchido o ID para identificação", response = Administrador.class)
     public ResponseEntity<?> update(@RequestBody Administrador administrador) {
         verifyIfAdministradorExists(administrador.getId());
         dao.save(administrador);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "{id}")
+    @ApiOperation(value = "Deletar Administrador", notes = "Deletar Administrador a partir do ID indicado na URL")
+    public ResponseEntity<?> delete(@PathVariable Long id) {
+        verifyIfAdministradorExists(id);
+        dao.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
