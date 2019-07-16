@@ -1,9 +1,10 @@
 package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 
-import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
+import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.ApplicationUser;
 import br.com.Sparta.SpartaSalesManager.persistence.model.Saida;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.SaidaRepository;
+import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("v1/vendedor/saida")
 public class SaidaEndpoint {
     private final SaidaRepository dao;
+    private final EndpointUtil<Saida> endpointUtil;
 
     @Autowired
-    public SaidaEndpoint(SaidaRepository entradaRepository) {
+    public SaidaEndpoint(SaidaRepository entradaRepository, EndpointUtil<Saida> endpointUtil) {
         this.dao = entradaRepository;
+        this.endpointUtil = endpointUtil;
     }
 
     @GetMapping
@@ -30,21 +33,21 @@ public class SaidaEndpoint {
 
     @GetMapping(path = "{id}")
     @ApiOperation(value = "Pequisar Saída pelo ID", notes = "Pesquisar Saída pelo ID indicado na URL", response = Saida.class)
-    public ResponseEntity<?> getSaidaById(@PathVariable long id) {
-        return new ResponseEntity<>(dao.findById(id), HttpStatus.OK);
+    public ResponseEntity<?> getById(@PathVariable long id) {
+        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
     }
 
     @GetMapping(path = "/serchByUsuarioLogado")
     @ApiOperation(value = "Pequisar Saídas pelo usuário logado", notes = "Pesquisar Saídas pelo usuário logado", response = Saida.class)
     public ResponseEntity<?> getSaidaByUser(Authentication authentication) {
         ApplicationUser applicationUser = ((ApplicationUser) authentication.getPrincipal());
-        return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
+        return endpointUtil.returnObjectOrNotFound(dao.findByApplicationUser(applicationUser));
     }
 
     @GetMapping(path = "/serchByUsuarioInformado")
     @ApiOperation(value = "Pequisar Saídas pelo usuário informado", notes = "Pesquisar Saídas pelo usuário informado", response = Saida.class)
     public ResponseEntity<?> getSaidaByInformeUser(ApplicationUser applicationUser) {
-        return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
+        return endpointUtil.returnObjectOrNotFound(dao.findByApplicationUser(applicationUser));
     }
 
     @PostMapping
@@ -72,7 +75,7 @@ public class SaidaEndpoint {
     }
 
     private void verifyIfSaidaExists(Long id) {
-        if (!dao.findById(id).isPresent())
-            throw new ResourceNotFoundException("Saída nao encontrada para o ID: " + id);
+        if (!dao.existsById(id))
+            throw new ResourceNotFoundException("Saída não encontrada para o ID: " + id);
     }
 }

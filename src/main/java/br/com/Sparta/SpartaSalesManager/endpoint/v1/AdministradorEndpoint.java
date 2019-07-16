@@ -1,8 +1,9 @@
 package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 
-import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
+import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.Administrador;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.AdministradorRepository;
+import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +18,12 @@ import javax.validation.Valid;
 public class AdministradorEndpoint {
 
     private final AdministradorRepository dao;
+    private final EndpointUtil<Administrador> endpointUtil;
 
     @Autowired
-    public AdministradorEndpoint(AdministradorRepository administradorRepository) {
+    public AdministradorEndpoint(AdministradorRepository administradorRepository, EndpointUtil<Administrador> endpointUtil) {
         this.dao = administradorRepository;
+        this.endpointUtil = endpointUtil;
     }
 
     @GetMapping
@@ -29,10 +32,16 @@ public class AdministradorEndpoint {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
+    @GetMapping(path = "{id}")
+    @ApiOperation(value = "Pesquisar Administrador pelo ID", notes = "Pesquisar Administrador pelo ID indicado na URL", response = Administrador.class)
+    public ResponseEntity<?> getById(@PathVariable long id) {
+        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
+    }
+
     @GetMapping("findByCPF/{CPF}")
-    @ApiOperation(value = "Pesquisar administrador pelo CPF", notes = "Pesquisa Administrador específico digitando o CPF na URL", response = Administrador.class)
+    @ApiOperation(value = "Pesquisar Administrador pelo CPF", notes = "Pesquisa Administrador específico digitando o CPF na URL", response = Administrador.class)
     public ResponseEntity<?> getAdministradorByCPF(@PathVariable String CPF) {
-        return new ResponseEntity<>(dao.findByCpf(CPF), HttpStatus.OK);
+        return endpointUtil.returnObjectOrNotFound(dao.findByCpf(CPF));
     }
 
     @PostMapping
@@ -58,7 +67,7 @@ public class AdministradorEndpoint {
     }
 
     private void verifyIfAdministradorExists(Long id) {
-        if (!dao.findById(id).isPresent())
-            throw new ResourceNotFoundException("ApplicationUser not found for ID: " + id);
+        if (!dao.existsById(id))
+            throw new ResourceNotFoundException("Administrador não encontrado para o ID: " + id);
     }
 }

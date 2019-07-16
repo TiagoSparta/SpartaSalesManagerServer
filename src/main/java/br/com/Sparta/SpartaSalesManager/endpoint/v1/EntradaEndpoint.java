@@ -1,9 +1,10 @@
 package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 
-import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
+import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.ApplicationUser;
 import br.com.Sparta.SpartaSalesManager.persistence.model.Entrada;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.EntradaRepository;
+import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("v1/administrador/entrada")
 public class EntradaEndpoint {
     private final EntradaRepository dao;
+    private final EndpointUtil<Entrada> endpointUtil;
 
     @Autowired
-    public EntradaEndpoint(EntradaRepository entradaRepository) {
+    public EntradaEndpoint(EntradaRepository entradaRepository, EndpointUtil endpointUtil, EndpointUtil<Entrada> endpointUtil1) {
         this.dao = entradaRepository;
+        this.endpointUtil = endpointUtil1;
     }
 
     @GetMapping
@@ -29,22 +32,22 @@ public class EntradaEndpoint {
     }
 
     @GetMapping(path = "{id}")
-    @ApiOperation(value = "PEsquisar Entrada pelo ID", notes = "Pesquisar Entrada pelo ID indicado na URL", response = Entrada.class)
-    public ResponseEntity<?> getEntradaById(@PathVariable long id) {
-        return new ResponseEntity<>(dao.findById(id), HttpStatus.OK);
+    @ApiOperation(value = "Pesquisar Entrada pelo ID", notes = "Pesquisar Entrada pelo ID indicado na URL", response = Entrada.class)
+    public ResponseEntity<?> getById(@PathVariable long id) {
+        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
     }
 
-    @GetMapping(path = "/serchByUsuarioLogado")
+    @GetMapping(path = "serchByUsuarioLogado")
     @ApiOperation(value = "Pesquisar Entradas pelo usuário logado", notes = "Pesquisar todas as Entradas a partir do Usuário logado", response = Entrada.class)
     public ResponseEntity<?> getEntradaByUsuarioLogado(Authentication authentication) {
         ApplicationUser applicationUser = ((ApplicationUser) authentication.getPrincipal());
-        return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
+        return endpointUtil.returnObjectOrNotFound(dao.findByApplicationUser(applicationUser));
     }
 
-    @GetMapping(path = "/serchByUsuarioInformado")
+    @GetMapping(path = "serchByUsuarioInformado")
     @ApiOperation(value = "Pesquisar Entradas pelo usuário informado", notes = "Pesquisar todas as Entradas a partido do usuário informado no Body", response = Entrada.class)
-    public ResponseEntity<?> getEntradaByInformedUser(ApplicationUser applicationUser) {
-        return new ResponseEntity<>(dao.findByApplicationUser(applicationUser), HttpStatus.OK);
+    public ResponseEntity<?> getEntradaByInformedUser(@RequestBody ApplicationUser applicationUser) {
+        return endpointUtil.returnObjectOrNotFound(dao.findByApplicationUser(applicationUser));
     }
 
     @PostMapping
@@ -72,7 +75,7 @@ public class EntradaEndpoint {
     }
 
     private void verifyIfEntradaExists(Long id) {
-        if (!dao.findById(id).isPresent())
-            throw new ResourceNotFoundException("Entrada nao encontrada para o ID: " + id);
+        if (!dao.existsById(id))
+            throw new ResourceNotFoundException("Entrada não encontrada para o ID: " + id);
     }
 }

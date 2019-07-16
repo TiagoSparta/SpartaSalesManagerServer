@@ -1,8 +1,10 @@
 package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 
-import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
+import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.MovimentacaoSaida;
+import br.com.Sparta.SpartaSalesManager.persistence.model.Saida;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.MovimentacaoSaidaRepository;
+import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -11,15 +13,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("v1/vendedor/saida/movimentacaoSaida")
 public class MovimentacaoSaidaEndpoint {
     private final MovimentacaoSaidaRepository dao;
+    private final EndpointUtil<MovimentacaoSaida> endpointUtil;
 
     @Autowired
-    public MovimentacaoSaidaEndpoint(MovimentacaoSaidaRepository movimentacaoSaidaRepository) {
+    public MovimentacaoSaidaEndpoint(MovimentacaoSaidaRepository movimentacaoSaidaRepository, EndpointUtil<MovimentacaoSaida> endpointUtil) {
         this.dao = movimentacaoSaidaRepository;
+        this.endpointUtil = endpointUtil;
     }
 
     @GetMapping
@@ -28,10 +33,29 @@ public class MovimentacaoSaidaEndpoint {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
+    @GetMapping(path = "{id}")
+    @ApiOperation(value = "Pesquisar Movimentação de Saída pelo ID", notes = "Pesquisar Movimentação de Saída pelo ID indicado na URL", response = MovimentacaoSaida.class)
+    public ResponseEntity<?> getById(@PathVariable long id) {
+        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
+    }
+
+    @GetMapping("findBySaida/{idSaida}")
+    @ApiOperation(value = "Pesquisar Movimentações de Saída pela Saída", notes = "Pesquisar Movimentações de Saída pelo ID de Saída inficado na URL", response = MovimentacaoSaida.class)
+    public ResponseEntity<?> getBySaida (@PathVariable Long idSaida) {
+        Saida s = new Saida(idSaida);
+        return endpointUtil.returnObjectOrNotFound(dao.findBySaida(s));
+    }
+
     @PostMapping
     @ApiOperation(value = "Gravar nova Movimentação de Saída", notes = "Gravar nova Movimentação de Saída enviada no Body", response = MovimentacaoSaida.class)
     public ResponseEntity<?> save(@Valid @RequestBody MovimentacaoSaida movimentacaoSaida) {
         return new ResponseEntity<>(dao.save(movimentacaoSaida), HttpStatus.CREATED);
+    }
+
+    @PostMapping("saveAll")
+    @ApiOperation(value = "Salvar novas Movimentações de Saída", notes = "Salvar novas Movimentações Saída enviadas no Body", response = MovimentacaoSaida.class)
+    public ResponseEntity<?> saveAll(@RequestBody List<MovimentacaoSaida> movimentacaoEntradaList) {
+        return new ResponseEntity<>(dao.saveAll(movimentacaoEntradaList), HttpStatus.CREATED);
     }
 
     @PutMapping
@@ -51,7 +75,7 @@ public class MovimentacaoSaidaEndpoint {
     }
 
     private void verifyIfMovimentacaoSaidaExists(Long id) {
-        if (!dao.findById(id).isPresent())
-            throw new ResourceNotFoundException("Movimentação de saida não encontrada para o ID: " + id);
+        if (!dao.existsById(id))
+            throw new ResourceNotFoundException("Movimentação de Saída não encontrada para o ID: " + id);
     }
 }

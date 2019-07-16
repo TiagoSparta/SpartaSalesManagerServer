@@ -20,6 +20,10 @@ public class Entrada extends AbstractEntity {
     public Entrada() {
     }
 
+    public Entrada(Long id) {
+        this.id = id;
+    }
+
     public Entrada(ApplicationUser applicationUser, @NotEmpty(message = "O tipo de operação deve ser declarado") String tipo, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
         this.applicationUser = applicationUser;
         this.tipo = tipo;

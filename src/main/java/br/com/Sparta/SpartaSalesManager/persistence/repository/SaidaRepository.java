@@ -5,7 +5,8 @@ import br.com.Sparta.SpartaSalesManager.persistence.model.Saida;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SaidaRepository extends PagingAndSortingRepository<Saida, Long> {
-    List<Saida> findByApplicationUser(ApplicationUser applicationUser);
+    List<Optional<Saida>> findByApplicationUser(ApplicationUser applicationUser);
 }

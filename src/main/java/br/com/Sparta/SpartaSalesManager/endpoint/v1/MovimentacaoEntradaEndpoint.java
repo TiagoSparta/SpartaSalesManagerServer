@@ -1,9 +1,10 @@
 package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 
-import br.com.Sparta.SpartaSalesManager.error.ResourceNotFoundException;
+import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.Entrada;
 import br.com.Sparta.SpartaSalesManager.persistence.model.MovimentacaoEntrada;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.MovimentacaoEntradaRepository;
+import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -17,10 +18,12 @@ import java.util.List;
 @RequestMapping("v1/administrador/entrada/movimentacaoEntrada")
 public class MovimentacaoEntradaEndpoint {
     private final MovimentacaoEntradaRepository dao;
-        
+    private final EndpointUtil<MovimentacaoEntrada> endpointUtil;
+
     @Autowired
-    public MovimentacaoEntradaEndpoint(MovimentacaoEntradaRepository movimentacaoEntradaRepository) {
+    public MovimentacaoEntradaEndpoint(MovimentacaoEntradaRepository movimentacaoEntradaRepository, EndpointUtil<MovimentacaoEntrada> endpointUtil) {
         this.dao = movimentacaoEntradaRepository;
+        this.endpointUtil = endpointUtil;
     }
 
     @GetMapping
@@ -29,12 +32,17 @@ public class MovimentacaoEntradaEndpoint {
         return new ResponseEntity<>(dao.findAll(pageable), HttpStatus.OK);
     }
 
+    @GetMapping(path = "{id}")
+    @ApiOperation(value = "Pesquisar Movimentação de Entrada pelo ID", notes = "Pesquisar Movimentação de Entrada pelo ID indicado na URL", response = MovimentacaoEntrada.class)
+    public ResponseEntity<?> getById(@PathVariable long id) {
+        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
+    }
+
     @GetMapping("findByEntrada/{idEntrada}")
     @ApiOperation(value = "Pesquisar Movimentações de Entrada pela Entrada", notes = "Pesquisar Movimentações de Entrada pelo ID de Entrada inficado na URL", response = MovimentacaoEntrada.class)
-    public ResponseEntity<?> findByEntrada (@PathVariable Long idEntrada) {
-        Entrada e = new Entrada();
-        e.setId(idEntrada);
-        return new ResponseEntity<>(dao.findByEntrada(e), HttpStatus.OK);
+    public ResponseEntity<?> findByEntrada(@PathVariable Long idEntrada) {
+        Entrada e = new Entrada(idEntrada);
+        return endpointUtil.returnObjectOrNotFound(dao.findByEntrada(e));
     }
 
     @PostMapping
@@ -66,7 +74,7 @@ public class MovimentacaoEntradaEndpoint {
     }
 
     private void verifyIfMovimentacaoEntradaExists(Long id) {
-        if (!dao.findById(id).isPresent())
-            throw new ResourceNotFoundException("Movimentação de entrada não encontrada para o ID: " + id);
+        if (!dao.existsById(id))
+            throw new ResourceNotFoundException("Movimentação de Entrada não encontrada para o ID: " + id);
     }
 }
