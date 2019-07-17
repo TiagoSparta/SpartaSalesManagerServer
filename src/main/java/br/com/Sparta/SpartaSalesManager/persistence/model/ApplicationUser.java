@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotEmpty;
+import java.util.Optional;
 
 @Entity
 public class ApplicationUser extends AbstractEntity {
@@ -24,6 +25,10 @@ public class ApplicationUser extends AbstractEntity {
         this.username = applicationUser.username;
         this.password = applicationUser.password;
         this.administrador = applicationUser.administrador;
+    }
+
+    public ApplicationUser(Optional<ApplicationUser> applicationUser) {
+
     }
 
     public String getUsername() {
