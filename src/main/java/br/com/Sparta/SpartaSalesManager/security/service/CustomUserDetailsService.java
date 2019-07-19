@@ -25,17 +25,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<ApplicationUser> applicationUser = loadApplicationUserByUsername(username);
+        ApplicationUser applicationUser = loadApplicationUserByUsername(username);
         return new CustomUserDetails(applicationUser);
     }
 
-    public Optional<ApplicationUser> loadApplicationUserByUsername(String username) {
+    public ApplicationUser loadApplicationUserByUsername(String username) {
         return Optional.ofNullable(applicationUserRepository.findByUsername(username))
                 .orElseThrow(() -> new UsernameNotFoundException("ApplicationUser not found"));
     }
 
     private final static class CustomUserDetails extends ApplicationUser implements UserDetails {
-        private CustomUserDetails(Optional<ApplicationUser> applicationUser) {
+        private CustomUserDetails(ApplicationUser applicationUser) {
             super(applicationUser);
         }
 

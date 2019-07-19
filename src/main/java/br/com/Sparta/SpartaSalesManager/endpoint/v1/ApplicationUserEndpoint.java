@@ -3,7 +3,6 @@ package br.com.Sparta.SpartaSalesManager.endpoint.v1;
 import br.com.Sparta.SpartaSalesManager.exception.ResourceNotFoundException;
 import br.com.Sparta.SpartaSalesManager.persistence.model.ApplicationUser;
 import br.com.Sparta.SpartaSalesManager.persistence.repository.ApplicationUserRepository;
-import br.com.Sparta.SpartaSalesManager.util.EndpointUtil;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +17,10 @@ import javax.validation.Valid;
 @RequestMapping("v1/administrador/applicationUser")
 public class ApplicationUserEndpoint {
     private final ApplicationUserRepository dao;
-    private final EndpointUtil<ApplicationUser> endpointUtil;
 
     @Autowired
-    public ApplicationUserEndpoint(ApplicationUserRepository dao, EndpointUtil<ApplicationUser> endpointUtil) {
+    public ApplicationUserEndpoint(ApplicationUserRepository dao) {
         this.dao = dao;
-        this.endpointUtil = endpointUtil;
     }
 
     @GetMapping
@@ -35,13 +32,13 @@ public class ApplicationUserEndpoint {
     @GetMapping(path = "{id}")
     @ApiOperation(value = "Pesquisar Usuário pelo ID", notes = "Pesquisar Usuário pelo ID indicado na URL", response = ApplicationUser.class)
     public ResponseEntity<?> getById(@PathVariable long id) {
-        return endpointUtil.returnObjectOrNotFound(dao.findById(id));
+        return new ResponseEntity<>(dao.findById(id), HttpStatus.OK);
     }
 
     @GetMapping(path = "findByUsername/{name}")
     @ApiOperation(value = "Pesquisar Usuários pelo nome", notes = "Pesquisar usuários pelo nome indicado na URL", response = ApplicationUser.class)
     public ResponseEntity<?> getByApplicationUserByUsername(@PathVariable String username) {
-        return endpointUtil.returnObjectOrNotFound(dao.findByUsername(username));
+        return new ResponseEntity<>(dao.findByUsername(username), HttpStatus.OK);
     }
 
     @PostMapping

@@ -14,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 import static br.com.Sparta.SpartaSalesManager.security.filter.Constants.*;
 
@@ -49,7 +48,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                 .getBody()
                 .getSubject();
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-        Optional<ApplicationUser> applicationUser = customUserDetailsService.loadApplicationUserByUsername(username);
+        ApplicationUser applicationUser = customUserDetailsService.loadApplicationUserByUsername(username);
         return username != null ? new UsernamePasswordAuthenticationToken(applicationUser, null, userDetails.getAuthorities()) : null;
     }
 }
