@@ -73,6 +73,13 @@ public class MovimentacaoEntradaEndpoint {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @DeleteMapping("deleteAll")
+    @ApiOperation(value = "Deletar lista de Movimentações de Entrada", notes = "Deletar lista de Movimentações Entrada enviadas no Body", response = MovimentacaoEntrada.class)
+    public ResponseEntity<?> deleteAll(@RequestBody List<MovimentacaoEntrada> movimentacaoEntradaList) {
+        dao.deleteAll(movimentacaoEntradaList);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     private void verifyIfMovimentacaoEntradaExists(Long id) {
         if (!dao.existsById(id))
             throw new ResourceNotFoundException("Movimentação de Entrada não encontrada para o ID: " + id);
